@@ -1,0 +1,22 @@
+[Unit]
+Description=webwarden per-user DNS allowlist resolver (%i)
+Documentation=man:dnsmasq(8)
+After=network.target webwarden-nft.service
+Wants=webwarden-nft.service
+PartOf=webwarden-nft.service
+# Restart a few times on failure, then give up (avoid crash loops).
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+# -k keeps dnsmasq in the foreground for systemd; --conf-file isolates this
+# instance to its own generated config (no global /etc/dnsmasq.d include).
+ExecStart=/usr/sbin/dnsmasq -k --conf-file=/etc/webwarden/users/%i/dnsmasq.conf
+Restart=on-failure
+RestartSec=2
+# dnsmasq retains CAP_NET_ADMIN (needed to populate nftables sets) after it
+# drops privileges to its own unprivileged user.
+
+[Install]
+WantedBy=multi-user.target

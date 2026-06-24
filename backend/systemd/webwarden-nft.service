@@ -1,0 +1,17 @@
+[Unit]
+Description=webwarden nftables ruleset loader
+Documentation=man:nft(8)
+After=network-pre.target
+Before=network.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Validate before loading so a bad ruleset never tears down a good one.
+ExecStartPre=/usr/sbin/nft -c -f /etc/webwarden/nftables.ruleset
+ExecStart=/usr/sbin/nft -f /etc/webwarden/nftables.ruleset
+ExecStop=-/usr/sbin/nft delete table inet kidfilter
+
+[Install]
+WantedBy=multi-user.target
