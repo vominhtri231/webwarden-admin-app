@@ -5,6 +5,7 @@ require root, mutate on-disk state, then re-apply enforcement. All commands exit
 0 on success and non-zero with a clear stderr message on error.
 """
 import argparse
+import datetime
 import os
 import sys
 
@@ -121,11 +122,41 @@ def cmd_users(args):
 
 
 def cmd_status(args):
-    return _die("status is implemented in Phase 06", 3)
+    data = jsonapi.status_json()
+    if args.json:
+        print(jsonapi.dumps(data))
+    else:
+        print("firewall_loaded: {}".format(data["firewall_loaded"]))
+        for u in data["users"]:
+            flags = []
+            if u["locked"]:
+                flags.append("locked")
+            if u["has_sudo"]:
+                flags.append("sudo!")
+            if u["locked"] and not u["dns_service_active"]:
+                flags.append("service-down")
+            print("{}\t{}\t{} domains\t{}".format(
+                u["uid"], u["username"], u["allow_count"], " ".join(flags)))
+    return 0
 
 
 def cmd_log(args):
-    return _die("log is implemented in Phase 06", 3)
+    year = datetime.date.today().year
+    if args.summary:
+        data = jsonapi.log_summary_json(user=args.user, since=args.since, year=year)
+    else:
+        data = jsonapi.log_json(user=args.user, since=args.since,
+                                limit=args.limit, year=year)
+    if args.json:
+        print(jsonapi.dumps(data))
+    else:
+        for r in data:
+            if args.summary:
+                print("{}\t{}\t{}\tx{}\t{}".format(
+                    r["last_seen"], r["user"], r["domain"], r["count"], ""))
+            else:
+                print("{}\t{}\t{}".format(r["time"], r["user"], r["domain"]))
+    return 0
 
 
 # Parser ---------------------------------------------------------------------
