@@ -1,0 +1,15 @@
+[project]
+name = "webwarden"
+version = "0.1.0"
+description = "Per-user website allowlist + blocked-site log for Linux Mint (backend CLI + GTK4 admin GUI)"
+requires-python = ">=3.10"
+
+# Runtime deps are system packages on the target (python3-gi, gir1.2-gtk-4.0,
+# dnsmasq, nftables, policykit-1); none are pip-installed. Dev only needs pytest.
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+testpaths = ["backend/tests", "gui/tests"]
+python_files = ["test_*.py"]

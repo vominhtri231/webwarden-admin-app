@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=webwarden Admin
+Comment=Manage per-user website allowlists and view blocked attempts
+Exec=webwarden-admin
+Icon=security-high
+Terminal=false
+Categories=System;Settings;Security;
+Keywords=parental;allowlist;filter;firewall;dns;

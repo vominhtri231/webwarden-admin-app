@@ -1,0 +1,6 @@
+#!/bin/sh
+# webwarden CLI entry point (installed to /usr/local/sbin/webwarden).
+# The Python package is installed to /usr/share/webwarden by install.sh.
+PYTHONPATH="/usr/share/webwarden${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH
+exec /usr/bin/python3 -m webwarden_cli "$@"

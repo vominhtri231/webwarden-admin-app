@@ -1,0 +1,32 @@
+/* webwarden admin styling (plain GTK4, Cinnamon-friendly). */
+
+.toast {
+    background-color: #303030;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.toast-error {
+    background-color: #a51d2d;
+}
+
+/* sudo / service-down warning badge */
+.warn-badge {
+    background-color: #e5a50a;
+    color: #000000;
+    padding: 1px 8px;
+    border-radius: 8px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.ok-badge {
+    background-color: #26a269;
+    color: #ffffff;
+    padding: 1px 8px;
+    border-radius: 8px;
+    font-size: 0.8em;
+}
+
+.error-text { color: #c01c28; }

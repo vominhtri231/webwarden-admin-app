@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>webwarden</vendor>
+  <vendor_url>https://example.invalid/webwarden</vendor_url>
+
+  <action id="org.webwarden.admin.run">
+    <description>Run the webwarden allowlist manager</description>
+    <message>Authentication is required to manage website allowlists</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <!-- pkexec matches the binary by its path; only argv1 can be constrained by
+         policy, so argument safety is enforced inside the CLI itself. -->
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/sbin/webwarden</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+</policyconfig>

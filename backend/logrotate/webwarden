@@ -1,0 +1,12 @@
+# webwarden per-user dnsmasq query logs. Installed to /etc/logrotate.d/webwarden.
+# copytruncate avoids having to signal each per-user dnsmasq instance to reopen
+# its log; dnsmasq keeps writing to the same (now truncated) file.
+/var/log/webwarden/*.log {
+    weekly
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

@@ -38,9 +38,58 @@ For an administrator on a single Linux Mint machine, this app lets you:
 - Physical / BIOS / live-USB bypass needs a BIOS password + disk encryption.
 - Rare ECH sites may need explicit allowlisting.
 
+## Install
+
+Run on the target Linux Mint / Ubuntu machine as an admin:
+
+```bash
+# 1. Dependencies
+sudo apt install python3 python3-gi gir1.2-gtk-4.0 dnsmasq nftables policykit-1
+
+# 2. Install webwarden (from the repo root)
+sudo ./install.sh
+```
+
+`install.sh` installs the `webwarden` CLI (`/usr/local/sbin`), the GTK4 GUI, the
+templated systemd units, the Polkit policy, logrotate, and creates
+`/var/log/webwarden` (`750 root:adm`). It validates the nftables ruleset
+(`nft -c -f`) and generates an initial ruleset before enabling anything.
+
+## Daily use
+
+Launch **webwarden Admin** from the system menu (or run `webwarden-admin`). The
+GUI runs unprivileged; the first mutating action shows one standard Polkit
+password dialog, then caches the authorization for the session.
+
+- **Users** — toggle a user **Locked**. A locked user may only visit their
+  allowlist. A warning badge flags any locked user who still has admin rights
+  (run `deluser <user> sudo` to fix; the app never removes sudo for you).
+- **Allowlist** — pick a user, add domains (`example.com` or a pasted URL — the
+  app strips the scheme/path and validates it). Approving a domain also covers
+  its subdomains. Remove with one click.
+- **Blocked Log** — every refused request, attributed to a user with a timestamp.
+  Search, filter by last 24h / 7d, switch to a deduped **Summary**, and
+  **Allow selected** to approve a blocked domain in one click. Auto-refreshes.
+- **Status** — firewall-loaded indicator and each locked user's resolver health.
+
+CLI equivalents (used by the GUI, usable directly as root):
+`webwarden lock <user>`, `webwarden allow <user> <domain>…`, `webwarden log --json`,
+`webwarden status --json`. See `SPEC.md` §4.4 for the full contract.
+
+## Uninstall
+
+```bash
+sudo ./uninstall.sh            # removes the program, keeps policy + logs
+sudo ./uninstall.sh --purge    # also removes /etc/webwarden and /var/log/webwarden
+```
+
 ## Status
 
-Early scaffold. Implementation tracked against [`SPEC.md`](./SPEC.md) — deliverables: patched backend (§4), GUI + Polkit policy + `.desktop` launcher (§5), updated `install.sh`, and this README.
+Implementation complete (backend CLI, GTK4 GUI, packaging) with a full
+Windows-runnable unit-test suite. Kernel/service/GTK behavior is validated on a
+Linux Mint machine via the acceptance runbook in
+[`docs/acceptance-checklist.md`](./docs/acceptance-checklist.md). Tracked against
+[`SPEC.md`](./SPEC.md).
 
 ## Development tooling
 

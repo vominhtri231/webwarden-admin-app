@@ -1,0 +1,11 @@
+// webwarden Polkit rules.
+// Members of the sudo/adm group manage allowlists by authenticating once per
+// session (AUTH_ADMIN_KEEP). Everyone else falls through to the policy default
+// (auth_admin), so a non-admin cannot run it even with a password.
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.webwarden.admin.run") {
+        if (subject.isInGroup("sudo") || subject.isInGroup("adm")) {
+            return polkit.Result.AUTH_ADMIN_KEEP;
+        }
+    }
+});
