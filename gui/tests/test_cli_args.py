@@ -26,6 +26,14 @@ def test_mutation_args():
     assert a.unlock_args("alice") == ["webwarden", "unlock", "alice"]
 
 
+def test_settings_and_log_admin_args():
+    assert a.settings_args() == ["webwarden", "settings", "--json"]
+    assert a.set_retention_args(7) == ["webwarden", "settings", "--set-retention-days", "7"]
+    assert a.log_clear_args() == ["webwarden", "log", "--clear"]
+    assert a.log_prune_args() == ["webwarden", "log", "--prune"]
+    assert a.log_prune_args(5) == ["webwarden", "log", "--prune", "--days", "5"]
+
+
 def test_prepare_domain():
     assert a.prepare_domain("https://Example.com/x") == ("example.com", True)
     assert a.prepare_domain("nope zzz")[1] is False

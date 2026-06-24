@@ -10,7 +10,9 @@ Nothing is loaded or (re)started until BOTH the dnsmasq configs and the ruleset
 validate. The instance reconcile attempts every user and aggregates failures, so
 one crash-looping instance can't silently leave the rest in a stale state.
 """
-from . import dnsmasq_config, nftables_ruleset, paths, services
+import datetime
+
+from . import dnsmasq_config, logparse, nftables_ruleset, paths, services, settings
 
 
 def apply(reason=""):
@@ -51,5 +53,12 @@ def apply(reason=""):
             services.stop_disable_instance(name)        # newly unlocked
         except services.CommandError as e:
             errors.append(str(e))
+
+    # 5. enforce blocked-log retention (cheap; never let it break apply)
+    try:
+        logparse.prune_all(settings.get_retention_days(), year=datetime.date.today().year)
+    except Exception:
+        pass
+
     if errors:
         raise RuntimeError("some dnsmasq instances failed to reconcile: " + "; ".join(errors))

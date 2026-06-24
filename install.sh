@@ -49,6 +49,8 @@ command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f -t 
 echo "Installing systemd units..."
 install -m 0644 "$SRC/backend/systemd/webwarden-dns@.service" /etc/systemd/system/webwarden-dns@.service
 install -m 0644 "$SRC/backend/systemd/webwarden-nft.service" /etc/systemd/system/webwarden-nft.service
+install -m 0644 "$SRC/backend/systemd/webwarden-logprune.service" /etc/systemd/system/webwarden-logprune.service
+install -m 0644 "$SRC/backend/systemd/webwarden-logprune.timer" /etc/systemd/system/webwarden-logprune.timer
 systemctl daemon-reload
 
 echo "Installing Polkit policy + rules..."
@@ -69,6 +71,7 @@ install -d -m 0750 -o root -g "$log_group" /var/log/webwarden
 echo "Generating + loading initial ruleset..."
 /usr/local/sbin/webwarden apply
 systemctl enable webwarden-nft.service
+systemctl enable --now webwarden-logprune.timer
 
 command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database /usr/share/applications || true
 

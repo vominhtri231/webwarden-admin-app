@@ -10,7 +10,7 @@ import os
 import sys
 
 from . import apply as apply_module
-from . import jsonapi, state, users, validation
+from . import jsonapi, logparse, settings, state, users, validation
 
 
 def _die(msg, code=2):
@@ -140,7 +140,37 @@ def cmd_status(args):
     return 0
 
 
+def cmd_settings(args):
+    if args.set_retention_days is not None:
+        if not _is_root():
+            return _die("must run as root")
+        days = settings.set_retention_days(args.set_retention_days)
+        logparse.prune_all(days, year=datetime.date.today().year)   # enforce now
+        print("log_retention_days set to {}".format(days))
+        return 0
+    data = settings.read_settings()
+    if args.json:
+        print(jsonapi.dumps(data))
+    else:
+        print("log_retention_days: {}".format(settings.get_retention_days()))
+    return 0
+
+
 def cmd_log(args):
+    if args.clear:
+        if not _is_root():
+            return _die("must run as root")
+        n = logparse.clear_all()
+        print("cleared {} log file(s)".format(n))
+        return 0
+    if args.prune:
+        if not _is_root():
+            return _die("must run as root")
+        days = args.days if args.days is not None else settings.get_retention_days()
+        removed = logparse.prune_all(days, year=datetime.date.today().year)
+        print("pruned {} entr{} older than {} day(s)".format(
+            removed, "y" if removed == 1 else "ies", days))
+        return 0
     year = datetime.date.today().year
     if args.summary:
         data = jsonapi.log_summary_json(user=args.user, since=args.since, year=year)
@@ -199,13 +229,23 @@ def build_parser():
     sp = sub.add_parser("apply", help="reconcile running state with policy")
     sp.set_defaults(func=cmd_apply)
 
-    sp = sub.add_parser("log", help="blocked-attempt log (JSON)")
+    sp = sub.add_parser("log", help="blocked-attempt log (JSON); also --prune/--clear")
     sp.add_argument("--json", action="store_true")
     sp.add_argument("--summary", action="store_true")
     sp.add_argument("--user")
     sp.add_argument("--since")
     sp.add_argument("--limit", type=int)
+    sp.add_argument("--clear", action="store_true", help="truncate all user logs (root)")
+    sp.add_argument("--prune", action="store_true",
+                    help="drop entries older than retention (root)")
+    sp.add_argument("--days", type=int, help="override retention days for --prune")
     sp.set_defaults(func=cmd_log)
+
+    sp = sub.add_parser("settings", help="read/update app settings (JSON)")
+    sp.add_argument("--json", action="store_true")
+    sp.add_argument("--set-retention-days", type=int,
+                    help="set blocked-log retention in days (0 = keep forever; root)")
+    sp.set_defaults(func=cmd_settings)
 
     return p
 

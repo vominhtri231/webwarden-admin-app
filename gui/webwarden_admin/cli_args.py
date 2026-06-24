@@ -35,6 +35,25 @@ def log_args(user=None, since=None, limit=None, summary=False):
     return args
 
 
+def settings_args():
+    return [WEBWARDEN, "settings", "--json"]
+
+
+def set_retention_args(days):
+    return [WEBWARDEN, "settings", "--set-retention-days", str(int(days))]
+
+
+def log_clear_args():
+    return [WEBWARDEN, "log", "--clear"]
+
+
+def log_prune_args(days=None):
+    args = [WEBWARDEN, "log", "--prune"]
+    if days is not None:
+        args += ["--days", str(int(days))]
+    return args
+
+
 def allow_args(username, domains):
     return [WEBWARDEN, "allow", username, *domains]
 
