@@ -1,0 +1,21 @@
+# Claude Code toolkit (local tooling, not part of the project deliverable)
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs / local state
+*.log
