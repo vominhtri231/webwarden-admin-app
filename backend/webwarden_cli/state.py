@@ -27,6 +27,11 @@ def _atomic_write(path, content, mode=0o640):
         pass  # chmod is a no-op / not permitted on some dev platforms
 
 
+def atomic_write(path, content, mode=0o640):
+    """Public atomic writer reused by the config generators."""
+    _atomic_write(path, content, mode)
+
+
 def _read_lines(path):
     try:
         with open(path, "r", encoding="utf-8") as f:

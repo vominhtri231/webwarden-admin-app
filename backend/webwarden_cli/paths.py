@@ -19,36 +19,39 @@ def log_dir():
     return os.environ.get("WEBWARDEN_LOG_DIR", DEFAULT_LOG_DIR)
 
 
+# NOTE: these are Linux target paths that also get embedded verbatim into config
+# files (e.g. dnsmasq log-facility). Always join with "/" so a Windows dev host
+# never emits backslashes; forward-slash paths still work for local file I/O.
 def users_dir():
-    return os.path.join(etc_root(), "users")    # users/<username>/{allowlist.txt,dnsmasq.conf}
+    return etc_root() + "/users"                # users/<username>/{allowlist.txt,dnsmasq.conf}
 
 
 def locked_file():
-    return os.path.join(etc_root(), "locked-users.txt")
+    return etc_root() + "/locked-users.txt"
 
 
 def port_index_file():
-    return os.path.join(etc_root(), "ports.json")  # {"username": stable_index}
+    return etc_root() + "/ports.json"           # {"username": stable_index}
 
 
 def ruleset_file():
-    return os.path.join(etc_root(), "nftables.ruleset")
+    return etc_root() + "/nftables.ruleset"
 
 
 def user_dir(username):
-    return os.path.join(users_dir(), username)
+    return users_dir() + "/" + username
 
 
 def allowlist_path(username):
-    return os.path.join(user_dir(username), "allowlist.txt")
+    return user_dir(username) + "/allowlist.txt"
 
 
 def dnsmasq_conf_path(username):
-    return os.path.join(user_dir(username), "dnsmasq.conf")
+    return user_dir(username) + "/dnsmasq.conf"
 
 
 def user_log_path(username):
-    return os.path.join(log_dir(), username + ".log")
+    return log_dir() + "/" + username + ".log"
 
 
 # nftables --------------------------------------------------------------------
