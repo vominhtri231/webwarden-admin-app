@@ -1,0 +1,6 @@
+#!/bin/sh
+# webwarden-admin GUI launcher (installed to /usr/local/bin/webwarden-admin).
+# The Python package is installed to /usr/share/webwarden-admin by install.sh.
+PYTHONPATH="/usr/share/webwarden-admin${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH
+exec /usr/bin/python3 -m webwarden_admin "$@"
