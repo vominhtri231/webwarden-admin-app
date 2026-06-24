@@ -20,7 +20,11 @@ class AllowlistView(Gtk.Box):
 
         top = Gtk.Box(spacing=6)
         top.append(Gtk.Label(label="User:"))
-        self.user_dd = Gtk.DropDown()
+        # A bare Gtk.DropDown() has no factory/expression, so a StringList model
+        # renders as blank rows. The expression tells the built-in factory how to
+        # pull the display text from each GtkStringObject (its "string" property).
+        self.user_dd = Gtk.DropDown(
+            expression=Gtk.PropertyExpression.new(Gtk.StringObject, None, "string"))
         self.user_dd.connect("notify::selected", self._on_user_changed)
         top.append(self.user_dd)
         self.append(top)
