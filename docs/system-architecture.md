@@ -1,6 +1,19 @@
 # System Architecture
 
-> Living document. Expanded with a full data-flow diagram in Phase 11.
+## Data / enforcement flow
+
+```mermaid
+flowchart LR
+    GUI["GTK4 GUI<br/>(unprivileged)"] -->|pkexec + argv| CLI["webwarden CLI<br/>(root)"]
+    CLI --> STATE["/etc/webwarden<br/>locked-users, allowlists, ports"]
+    CLI -->|apply| DNS["per-user dnsmasq<br/>127.0.0.1:5354+N"]
+    CLI -->|apply| NFT["nftables<br/>inet kidfilter"]
+    DNS -->|nftset=| NFT
+    DNS -->|log-queries| LOG["/var/log/webwarden/&lt;user&gt;.log"]
+    NFT -->|meta skuid: redirect DNS,<br/>allow 80/443 to sets, reject rest| KERN["locked user's traffic"]
+    LOG -->|log --json| CLI
+    CLI -->|status/list/users/log JSON| GUI
+```
 
 ## Components
 - **Backend CLI (`webwarden`, Python 3, `/usr/local/sbin/webwarden`)** — the only

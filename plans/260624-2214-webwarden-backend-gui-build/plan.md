@@ -2,7 +2,7 @@
 title: webwarden — backend (from scratch) + GTK4 admin GUI
 slug: webwarden-backend-gui-build
 date: 2026-06-24
-status: in_progress
+status: implemented (Tier A green; Tier B Linux acceptance pending on-target)
 mode: hard (research done, 3 researcher reports)
 blockedBy: []
 blocks: []
@@ -38,17 +38,20 @@ webwarden apply
 ## Phases
 | # | Phase | Status | Linux-only? |
 |---|-------|--------|-------------|
-| 01 | [Foundations & conventions](phase-01-foundations-and-conventions.md) | pending | no |
-| 02 | [Backend CLI core & state model](phase-02-backend-cli-core-and-state.md) | pending | no (logic) |
-| 03 | [dnsmasq per-user config generation](phase-03-dnsmasq-config-generation.md) | pending | test only |
-| 04 | [nftables ruleset generation](phase-04-nftables-ruleset-generation.md) | pending | test only |
-| 05 | [Apply orchestration & systemd units](phase-05-apply-orchestration-and-systemd.md) | pending | **yes (apply)** |
-| 06 | [Logging & JSON API](phase-06-logging-and-json-api.md) | pending | parse logic no; format verify **yes** |
-| 07 | [GUI shell & async CLI client](phase-07-gui-shell-and-cli-client.md) | pending | run **yes**; logic no |
-| 08 | [GUI views (users/allowlist/log/status)](phase-08-gui-views.md) | pending | run **yes**; logic no |
-| 09 | [Packaging: Polkit, .desktop, install/uninstall](phase-09-packaging-polkit-install.md) | pending | **yes** |
-| 10 | [Testing & acceptance](phase-10-testing-and-acceptance.md) | pending | unit no; §8 **yes** |
-| 11 | [Docs & handoff](phase-11-docs-and-handoff.md) | pending | no |
+| 01 | [Foundations & conventions](phase-01-foundations-and-conventions.md) | ✅ done | no |
+| 02 | [Backend CLI core & state model](phase-02-backend-cli-core-and-state.md) | ✅ done | no (logic) |
+| 03 | [dnsmasq per-user config generation](phase-03-dnsmasq-config-generation.md) | ✅ done | test only |
+| 04 | [nftables ruleset generation](phase-04-nftables-ruleset-generation.md) | ✅ done | test only |
+| 05 | [Apply orchestration & systemd units](phase-05-apply-orchestration-and-systemd.md) | ✅ done | **yes (apply)** |
+| 06 | [Logging & JSON API](phase-06-logging-and-json-api.md) | ✅ done | parse logic no; format verify **yes** |
+| 07 | [GUI shell & async CLI client](phase-07-gui-shell-and-cli-client.md) | ✅ done | run **yes**; logic no |
+| 08 | [GUI views (users/allowlist/log/status)](phase-08-gui-views.md) | ✅ done | run **yes**; logic no |
+| 09 | [Packaging: Polkit, .desktop, install/uninstall](phase-09-packaging-polkit-install.md) | ✅ done | **yes** |
+| 10 | [Testing & acceptance](phase-10-testing-and-acceptance.md) | ✅ Tier A done; Tier B pending on Mint | unit no; §8 **yes** |
+| 11 | [Docs & handoff](phase-11-docs-and-handoff.md) | ✅ done | no |
+
+**Code review:** completed (`plans/reports/code-reviewer-260624-2229-webwarden-implementation.md`) — H1–H4 fixed.
+**Tests:** 109 passing on Windows (`scripts/check.ps1`). **Commits:** one per phase on `feat/webwarden-implementation`.
 
 ## Dependencies (build order)
 01 → 02 → {03, 04} → 05 → 06 → 07 → 08 → 09 → 10 → 11.
