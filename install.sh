@@ -39,6 +39,13 @@ install -m 0755 "$SRC/gui/webwarden-admin" /usr/local/bin/webwarden-admin
 install -d /usr/share/applications
 install -m 0644 "$SRC/gui/data/webwarden-admin.desktop" /usr/share/applications/webwarden-admin.desktop
 
+echo "Installing app icon..."
+# Scalable SVG in the hicolor theme; GTK/Cinnamon render it at any size via
+# librsvg, so no per-size PNGs are needed.
+install -d /usr/share/icons/hicolor/scalable/apps
+install -m 0644 "$SRC/assets/icons/webwarden-admin.svg" /usr/share/icons/hicolor/scalable/apps/webwarden-admin.svg
+command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true
+
 echo "Installing systemd units..."
 install -m 0644 "$SRC/backend/systemd/webwarden-dns@.service" /etc/systemd/system/webwarden-dns@.service
 install -m 0644 "$SRC/backend/systemd/webwarden-nft.service" /etc/systemd/system/webwarden-nft.service

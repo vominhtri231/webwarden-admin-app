@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <title>webwarden Admin</title>
+  <defs>
+    <linearGradient id="shield" x1="256" y1="40" x2="256" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5468f0"/>
+      <stop offset="1" stop-color="#3b3fc4"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="256" y1="40" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Guard shield -->
+  <path d="M256 40 L432 104 V236 C432 340 358 422 256 472 C154 422 80 340 80 236 V104 Z"
+        fill="url(#shield)" stroke="#2c2f9c" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Upper gloss highlight -->
+  <path d="M256 40 L432 104 V236 C432 300 404 350 360 388 C360 200 320 96 256 64 Z"
+        fill="url(#gloss)"/>
+
+  <!-- Approval check: webwarden lets approved sites through -->
+  <path d="M188 256 L236 306 L332 196"
+        fill="none" stroke="#ffffff" stroke-width="34"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
