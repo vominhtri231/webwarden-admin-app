@@ -29,6 +29,8 @@ def test_render_golden_single_user():
         "        meta skuid 1000 ip6 daddr ::1 accept\n"
         "        meta skuid 1000 tcp dport { 80, 443 } ip daddr @allow_v4_alice accept\n"
         "        meta skuid 1000 tcp dport { 80, 443 } ip6 daddr @allow_v6_alice accept\n"
+        "        meta skuid 1000 udp dport 443 ip daddr @allow_v4_alice accept\n"
+        "        meta skuid 1000 udp dport 443 ip6 daddr @allow_v6_alice accept\n"
         "        meta skuid 1000 reject with icmpx type admin-prohibited\n"
         "    }\n"
         "}\n"

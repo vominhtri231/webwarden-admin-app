@@ -60,7 +60,7 @@ def write_user_dnsmasq(username, upstreams=paths.DEFAULT_UPSTREAMS):
     if port is None:
         raise ValueError("user {} has no allocated port (not locked?)".format(username))
     conf = render_dnsmasq_conf(username, port, state.read_allowlist(username), upstreams)
-    state.atomic_write(paths.dnsmasq_conf_path(username), conf, mode=0o644)
+    state.atomic_write(paths.dnsmasq_conf_path(username), conf, mode=0o640)
     return conf
 
 

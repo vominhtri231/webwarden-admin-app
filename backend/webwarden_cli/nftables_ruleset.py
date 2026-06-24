@@ -58,6 +58,10 @@ def render_ruleset(specs):
         lines.append("        meta skuid {} ip6 daddr ::1 accept".format(uid))
         lines.append("        meta skuid {} tcp dport {{ 80, 443 }} ip daddr @{} accept".format(uid, v4))
         lines.append("        meta skuid {} tcp dport {{ 80, 443 }} ip6 daddr @{} accept".format(uid, v6))
+        # HTTP/3 (QUIC) to allowed sites; still constrained to the allow-sets, so
+        # an external DoH resolver (not in the set) stays blocked.
+        lines.append("        meta skuid {} udp dport 443 ip daddr @{} accept".format(uid, v4))
+        lines.append("        meta skuid {} udp dport 443 ip6 daddr @{} accept".format(uid, v6))
         lines.append("        meta skuid {} reject with icmpx type admin-prohibited".format(uid))
     lines.append("    }")
     lines.append("}")
