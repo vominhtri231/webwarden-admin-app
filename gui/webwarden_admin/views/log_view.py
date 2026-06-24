@@ -7,7 +7,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, Gtk  # noqa: E402
 
-from ..cli_args import allow_args, log_args, since_iso
+from ..cli_args import allow_args, log_args, log_clear_args, since_iso
 from ..models.log_filter import filter_rows
 from ..models.row_items import LogItem
 from ..widgets.confirm import confirm
@@ -64,6 +64,10 @@ class LogView(Gtk.Box):
         refresh = Gtk.Button(label="Refresh")
         refresh.connect("clicked", lambda b: self.reload())
         bar.append(refresh)
+        clear = Gtk.Button(label="Clear all logs")
+        clear.add_css_class("destructive-action")
+        clear.connect("clicked", lambda b: self._clear_logs())
+        bar.append(clear)
         self.append(bar)
 
     def _add_column(self, title, prop, expand=False):
@@ -116,6 +120,13 @@ class LogView(Gtk.Box):
                                      lambda out: self._after("Allowed {} for {}".format(domain, user)),
                                      self._err, key="allow")
         confirm(self.window, "Allow {} for {}?".format(domain, user), do)
+
+    def _clear_logs(self):
+        def do():
+            self.client.run_mutation(log_clear_args(),
+                                     lambda out: self._after("Cleared all blocked logs"),
+                                     self._err, key="log-clear")
+        confirm(self.window, "Delete ALL blocked-log entries for every user?", do)
 
     def _after(self, msg):
         self.window.notify(msg)

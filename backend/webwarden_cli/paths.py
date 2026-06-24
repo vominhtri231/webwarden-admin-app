@@ -30,6 +30,10 @@ def locked_file():
     return etc_root() + "/locked-users.txt"
 
 
+def settings_file():
+    return etc_root() + "/settings.json"          # app settings (log retention, ...)
+
+
 def port_index_file():
     return etc_root() + "/ports.json"           # {"username": stable_index}
 

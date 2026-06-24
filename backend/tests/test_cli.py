@@ -65,6 +65,35 @@ def test_list_json_output(_env, capsys):
     assert json.loads(out) == {"username": "alice", "domains": ["a.com", "b.com"]}
 
 
+def test_settings_default_json(_env, capsys):
+    cli.main(["settings", "--json"])
+    data = json.loads(capsys.readouterr().out.strip())
+    assert data["log_retention_days"] == 30
+
+
+def test_settings_set_retention_persists(_env):
+    from webwarden_cli import settings
+    assert cli.main(["settings", "--set-retention-days", "7"]) == 0
+    assert settings.get_retention_days() == 7
+
+
+def test_log_clear_dispatches(_env, monkeypatch):
+    from webwarden_cli import logparse
+    calls = []
+    monkeypatch.setattr(logparse, "clear_all", lambda: calls.append("clear") or 3)
+    assert cli.main(["log", "--clear"]) == 0
+    assert calls == ["clear"]
+
+
+def test_log_prune_uses_days_override(_env, monkeypatch):
+    from webwarden_cli import logparse
+    seen = []
+    monkeypatch.setattr(logparse, "prune_all",
+                        lambda days, year=None, now=None: seen.append(days) or 0)
+    assert cli.main(["log", "--prune", "--days", "5"]) == 0
+    assert seen == [5]
+
+
 def test_users_json_output(_env, monkeypatch, capsys):
     monkeypatch.setattr(users, "list_human_users", lambda: [("alice", 1000), ("bob", 1001)])
     state.set_locked("alice", True)

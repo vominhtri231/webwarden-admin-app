@@ -18,6 +18,7 @@ for unit in $(systemctl list-units --type=service --all --no-legend --plain 'web
     systemctl disable --now "$unit" 2>/dev/null || true
 done
 systemctl disable --now webwarden-nft.service 2>/dev/null || true
+systemctl disable --now webwarden-logprune.timer 2>/dev/null || true
 nft delete table inet kidfilter 2>/dev/null || true
 
 echo "Removing files..."
@@ -28,6 +29,8 @@ rm -rf /usr/share/webwarden-admin
 rm -f /usr/share/applications/webwarden-admin.desktop
 rm -f /etc/systemd/system/webwarden-dns@.service
 rm -f /etc/systemd/system/webwarden-nft.service
+rm -f /etc/systemd/system/webwarden-logprune.service
+rm -f /etc/systemd/system/webwarden-logprune.timer
 rm -f /usr/share/polkit-1/actions/org.webwarden.admin.policy
 rm -f /etc/polkit-1/rules.d/50-webwarden.rules
 rm -f /etc/logrotate.d/webwarden

@@ -1,0 +1,7 @@
+[Unit]
+Description=webwarden blocked-log retention prune
+After=webwarden-nft.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/webwarden log --prune

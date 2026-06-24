@@ -29,10 +29,15 @@ flowchart LR
   restore state at boot.
 - **GTK4 GUI (`webwarden-admin`, unprivileged)** — drives the CLI via `pkexec` (Polkit);
   reads JSON, never writes `/etc/webwarden` directly.
+- **Log retention** — `settings.log_retention_days` (in `/etc/webwarden/settings.json`) bounds
+  blocked-log growth. Old entries are pruned at the end of every `apply`, by a daily
+  `webwarden-logprune.timer`, and on demand; `webwarden log --clear` truncates all user logs.
+  Pruning rewrites each file in place (preserving inode/owner, like logrotate `copytruncate`).
 
 ## Trust boundary
 Domain input is normalized + validated (`validation.py`) before being passed to the CLI as
 argv arrays — never shell-interpolated. Mutations require admin auth via the shipped Polkit policy.
 
 ## Stable CLI contract
-See `plans/260624-2214-webwarden-backend-gui-build/plan.md` (the GUI's API).
+See `plans/260624-2214-webwarden-backend-gui-build/plan.md` (the GUI's API). Additive commands:
+`webwarden settings [--json | --set-retention-days N]` and `webwarden log [--prune [--days N] | --clear]`.

@@ -1,4 +1,6 @@
 """Blocked-log parsing tests against captured-style dnsmasq log samples."""
+import datetime
+
 from webwarden_cli import logparse
 
 SAMPLE = (
@@ -46,6 +48,46 @@ def test_collect_blocked_across_users(tmp_path, monkeypatch):
     rows = logparse.collect_blocked(year=2026)
     assert rows[0] == {"time": "2026-06-24T23:00:00", "user": "bob", "domain": "bad.example.org"}
     assert {r["user"] for r in rows} == {"alice", "bob"}
+
+
+TWODAY = (
+    "Jun 20 10:00:00 dnsmasq[1]: config old.example.com is 0.0.0.0\n"
+    "Jun 24 22:11:00 dnsmasq[1]: config new.example.com is 0.0.0.0\n"
+)
+
+
+def test_prune_all_drops_old_keeps_recent(tmp_path, monkeypatch):
+    monkeypatch.setenv("WEBWARDEN_LOG_DIR", str(tmp_path))
+    _write(tmp_path, "alice.log", TWODAY)
+    removed = logparse.prune_all(2, year=2026, now=datetime.datetime(2026, 6, 24, 22, 30, 0))
+    assert removed == 1                       # cutoff Jun 22: Jun 20 dropped, Jun 24 kept
+    rows = logparse.collect_blocked(year=2026)
+    assert [r["domain"] for r in rows] == ["new.example.com"]
+
+
+def test_prune_zero_is_noop(tmp_path, monkeypatch):
+    monkeypatch.setenv("WEBWARDEN_LOG_DIR", str(tmp_path))
+    _write(tmp_path, "alice.log", SAMPLE)
+    assert logparse.prune_all(0, year=2026) == 0
+
+
+def test_prune_keeps_undatable_lines(tmp_path, monkeypatch):
+    monkeypatch.setenv("WEBWARDEN_LOG_DIR", str(tmp_path))
+    _write(tmp_path, "alice.log",
+           "no timestamp config x.com is 0.0.0.0\n"
+           "Jun 20 10:00:00 dnsmasq[1]: config old.com is 0.0.0.0\n")
+    removed = logparse.prune_all(2, year=2026, now=datetime.datetime(2026, 6, 24, 0, 0, 0))
+    assert removed == 1                       # only the dated-old line
+    assert "no timestamp" in (tmp_path / "alice.log").read_text(encoding="utf-8")
+
+
+def test_clear_all_truncates_every_file(tmp_path, monkeypatch):
+    monkeypatch.setenv("WEBWARDEN_LOG_DIR", str(tmp_path))
+    _write(tmp_path, "alice.log", SAMPLE)
+    _write(tmp_path, "bob.log", "Jun 24 23:00:00 dnsmasq[9]: config bad.org is 0.0.0.0\n")
+    assert logparse.clear_all() == 2
+    assert (tmp_path / "alice.log").read_text(encoding="utf-8") == ""
+    assert logparse.collect_blocked(year=2026) == []
 
 
 def test_summarize_counts_and_last_seen():

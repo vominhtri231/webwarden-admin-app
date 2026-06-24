@@ -39,12 +39,14 @@ class MainWindow(Gtk.ApplicationWindow):
         """Mount the four views into the stack."""
         from .views.allowlist_view import AllowlistView
         from .views.log_view import LogView
+        from .views.settings_view import SettingsView
         from .views.status_view import StatusView
         from .views.users_view import UsersView
         self.stack.add_titled(UsersView(self), "users", "Users")
         self.stack.add_titled(AllowlistView(self), "allowlist", "Allowlist")
         self.stack.add_titled(LogView(self), "log", "Blocked Log")
         self.stack.add_titled(StatusView(self), "status", "Status")
+        self.stack.add_titled(SettingsView(self), "settings", "Settings")
 
     def notify(self, text, error=False):
         self.toast.show(text, error=error)

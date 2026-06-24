@@ -24,7 +24,22 @@ All notable changes to webwarden. Format loosely follows Keep a Changelog.
 - Tests: 109 Windows-runnable unit tests; Linux acceptance runbook
   (`docs/acceptance-checklist.md`).
 
+### Added
+- Blocked-log retention: `/etc/webwarden/settings.json` (`log_retention_days`, default 30,
+  `0` = keep forever), privileged `webwarden settings` and `webwarden log --prune` / `--clear`,
+  a daily `webwarden-logprune.timer`, and a GUI **Settings** view + Log-view **Clear all logs**
+  button. Retention is also enforced at the end of every `apply` (#5).
+
+### Fixed
+- Allowlist user dropdown rendered blank — gave the `Gtk.DropDown` a `PropertyExpression` so
+  usernames display and a user can be selected (#2).
+- Silenced the startup `PyGIWarning` by pinning `Gdk` to `4.0` before import (#3).
+- Replaced the stock launcher icon with a branded `webwarden-admin` shield SVG installed into
+  the hicolor theme (#4).
+
 ### Security review
 - Fail-closed DNS validation added to `apply` (configs validated before activation).
 - Instance reconcile aggregates failures instead of aborting on the first.
 - dnsmasq config tightened to mode `0640`.
+- Log deletion (`prune`/`clear`) is root-only via the existing Polkit-gated binary; paths are
+  restricted to `*.log` under the log dir (no traversal); retention is validated to `0..365`.

@@ -10,6 +10,7 @@ the target's dnsmasq; ``_BLOCK_RE`` is isolated so the pattern can be swapped
 after capturing real log samples. ``year`` is supplied by the caller because
 dnsmasq log timestamps omit the year.
 """
+import datetime
 import os
 import re
 
@@ -81,6 +82,59 @@ def collect_blocked(user=None, since=None, year=None):
         rows.extend(parse_blocked(paths.user_log_path(name), name, since, year))
     rows.sort(key=lambda r: r["time"] or "", reverse=True)
     return rows
+
+
+# Retention / deletion -------------------------------------------------------
+def prune_log_file(path, cutoff_iso, year=None):
+    """Drop lines older than ``cutoff_iso`` from one log file, in place.
+
+    Lines without a parseable timestamp are kept (we can't date them). The
+    rewrite reuses the same open handle (seek+truncate) so the file's inode,
+    owner and mode are preserved and the writing dnsmasq instance keeps its fd
+    valid -- same rationale as logrotate ``copytruncate``. Returns lines removed.
+    """
+    try:
+        f = open(path, "r+", encoding="utf-8", errors="replace")
+    except FileNotFoundError:
+        return 0
+    with f:
+        lines = f.readlines()
+        kept = [ln for ln in lines
+                if not (_extract_iso(ln, year) and _extract_iso(ln, year) < cutoff_iso)]
+        removed = len(lines) - len(kept)
+        if removed:
+            f.seek(0)
+            f.writelines(kept)
+            f.truncate()
+    return removed
+
+
+def prune_all(retention_days, year=None, now=None):
+    """Prune every user log to ``retention_days``; no-op when it is 0/None.
+
+    Returns total lines removed across all user logs.
+    """
+    if not retention_days or retention_days <= 0:
+        return 0
+    now = now or datetime.datetime.now()
+    cutoff = (now - datetime.timedelta(days=retention_days)).strftime("%Y-%m-%dT%H:%M:%S")
+    total = 0
+    for name in _log_users(paths.log_dir()):
+        total += prune_log_file(paths.user_log_path(name), cutoff, year)
+    return total
+
+
+def clear_all():
+    """Truncate every user log to zero in place. Returns files cleared."""
+    count = 0
+    for name in _log_users(paths.log_dir()):
+        try:
+            with open(paths.user_log_path(name), "r+", encoding="utf-8") as f:
+                f.truncate(0)
+            count += 1
+        except FileNotFoundError:
+            continue
+    return count
 
 
 def summarize(rows):
