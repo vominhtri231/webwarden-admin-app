@@ -10,9 +10,6 @@ from gi.repository import Gtk  # noqa: E402
 
 from .widgets.toast import Toast
 
-PAGES = [("users", "Users"), ("allowlist", "Allowlist"),
-         ("log", "Blocked Log"), ("status", "Status")]
-
 
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, app, client, backend_ok):
@@ -39,19 +36,18 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_child(overlay)
 
     def build_views(self):
-        """Mount the real views. Overridden/extended in Phase 08."""
-        for name, title in PAGES:
-            self.stack.add_titled(self._placeholder(title), name, title)
+        """Mount the four views into the stack."""
+        from .views.allowlist_view import AllowlistView
+        from .views.log_view import LogView
+        from .views.status_view import StatusView
+        from .views.users_view import UsersView
+        self.stack.add_titled(UsersView(self), "users", "Users")
+        self.stack.add_titled(AllowlistView(self), "allowlist", "Allowlist")
+        self.stack.add_titled(LogView(self), "log", "Blocked Log")
+        self.stack.add_titled(StatusView(self), "status", "Status")
 
     def notify(self, text, error=False):
         self.toast.show(text, error=error)
-
-    @staticmethod
-    def _placeholder(title):
-        lbl = Gtk.Label(label=title + " — implemented in Phase 08")
-        lbl.set_vexpand(True)
-        lbl.set_hexpand(True)
-        return lbl
 
 
 def _backend_missing():
