@@ -1,6 +1,5 @@
 """GTK4 application entry: loads CSS and presents the main window."""
 import os
-import sys
 
 import gi
 
@@ -25,18 +24,7 @@ class WebwardenApp(Gtk.Application):
 
     def do_activate(self):
         self._load_css()
-        self._log_icon_diag()
         MainWindow(self, CliClient(), backend_available()).present()
-
-    def _log_icon_diag(self):
-        # DIAGNOSTIC (#4): confirm the icon theme actually resolves our names.
-        display = Gdk.Display.get_default()
-        if display is None:
-            return
-        theme = Gtk.IconTheme.get_for_display(display)
-        for name in (APP_ID, "webwarden-admin"):
-            print("[ww-admin][debug] icon-theme has {!r}: {}".format(
-                name, theme.has_icon(name)), file=sys.stderr)
 
     def _load_css(self):
         for path in _CSS_PATHS:
@@ -57,6 +45,4 @@ def main():
     # launcher (which carries StartupWMClass=org.webwarden.admin + our icon).
     GLib.set_prgname(APP_ID)
     GLib.set_application_name("webwarden Admin")
-    print("[ww-admin][debug] prgname={!r} app_id={!r}".format(
-        GLib.get_prgname(), APP_ID), file=sys.stderr)
     return WebwardenApp().run(None)

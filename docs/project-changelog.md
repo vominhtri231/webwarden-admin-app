@@ -36,6 +36,10 @@ All notable changes to webwarden. Format loosely follows Keep a Changelog.
 - Silenced the startup `PyGIWarning` by pinning `Gdk` to `4.0` before import (#3).
 - Replaced the stock launcher icon with a branded `webwarden-admin` shield SVG installed into
   the hicolor theme (#4).
+- Taskbar/window icon showed the Python logo: the launcher runs `python3 -m webwarden_admin`, so the
+  X11 `WM_CLASS` defaulted to `python3`. Pin the program name to the app id (`GLib.set_prgname`),
+  install the icon under the app-id name, and add `StartupWMClass` so the window-list maps to our
+  launcher (#4).
 
 ### Security review
 - Fail-closed DNS validation added to `apply` (configs validated before activation).
