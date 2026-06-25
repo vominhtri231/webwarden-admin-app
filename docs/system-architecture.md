@@ -33,6 +33,13 @@ flowchart LR
   blocked-log growth. Old entries are pruned at the end of every `apply`, by a daily
   `webwarden-logprune.timer`, and on demand; `webwarden log --clear` truncates all user logs.
   Pruning rewrites each file in place (preserving inode/owner, like logrotate `copytruncate`).
+- **Allowlist discovery** — a modern site spans many registrable domains + dynamic subdomains;
+  allowlisting one leaves it broken. Because dnsmasq `server=/d/`+`nftset=/d/` already suffix-match,
+  approving the *registrable* domain (`googlevideo.com`) covers all its subdomains. `log --summary
+  --group` (`domain_groups.registrable`, a heuristic eTLD+1) collapses blocked subdomains to the
+  registrable domain and flags shared/multi-tenant CDNs (`broad`). The GUI **Blocked-Log** view adds
+  a per-user filter and multi-select **batch approve** (one `allow <user> <d…>` per user), so the
+  admin builds the allowlist empirically from what a visit blocked — human-in-the-loop, no auto-add.
 
 ## Trust boundary
 Domain input is normalized + validated (`validation.py`) before being passed to the CLI as
@@ -41,3 +48,5 @@ argv arrays — never shell-interpolated. Mutations require admin auth via the s
 ## Stable CLI contract
 See `plans/260624-2214-webwarden-backend-gui-build/plan.md` (the GUI's API). Additive commands:
 `webwarden settings [--json | --set-retention-days N]` and `webwarden log [--prune [--days N] | --clear]`.
+`webwarden log --summary --group` is additive (read-only): grouped rows key on the registrable domain,
+sum member counts, and add a `broad` boolean. `log --summary` without `--group` is unchanged.

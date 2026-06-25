@@ -25,6 +25,12 @@ All notable changes to webwarden. Format loosely follows Keep a Changelog.
   (`docs/acceptance-checklist.md`).
 
 ### Added
+- Cross-origin allowlist discovery: `webwarden log --summary --group` collapses blocked subdomains
+  to their registrable domain (heuristic eTLD+1 in `domain_groups.py`) and flags shared/multi-tenant
+  CDNs (`broad`). The GUI **Blocked-Log** view gains a per-user filter and multi-select **batch
+  approve** (one privileged `allow <user> <domains…>` per user), so an admin builds the allowlist
+  from what visiting a site actually blocked. Additive, read-only flag; `log --summary` alone is
+  unchanged. Human-in-the-loop — no auto-approval.
 - Blocked-log retention: `/etc/webwarden/settings.json` (`log_retention_days`, default 30,
   `0` = keep forever), privileged `webwarden settings` and `webwarden log --prune` / `--clear`,
   a daily `webwarden-logprune.timer`, and a GUI **Settings** view + Log-view **Clear all logs**

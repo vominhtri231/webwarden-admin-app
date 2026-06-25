@@ -22,10 +22,12 @@ def list_args(username):
     return [WEBWARDEN, "list", username, "--json"]
 
 
-def log_args(user=None, since=None, limit=None, summary=False):
+def log_args(user=None, since=None, limit=None, summary=False, group=False):
     args = [WEBWARDEN, "log", "--json"]
     if summary:
         args.append("--summary")
+    if summary and group:
+        args.append("--group")
     if user:
         args += ["--user", user]
     if since:

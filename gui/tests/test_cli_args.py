@@ -16,6 +16,9 @@ def test_log_args_combinations():
         "webwarden", "log", "--json", "--user", "alice",
         "--since", "2026-06-24T00:00:00", "--limit", "50"]
     assert a.log_args(summary=True) == ["webwarden", "log", "--json", "--summary"]
+    assert a.log_args(summary=True, group=True) == [
+        "webwarden", "log", "--json", "--summary", "--group"]
+    assert a.log_args(group=True) == ["webwarden", "log", "--json"]   # group needs summary
 
 
 def test_mutation_args():

@@ -12,10 +12,12 @@ class LogItem(GObject.Object):
     user = GObject.Property(type=str, default="")
     domain = GObject.Property(type=str, default="")
     count = GObject.Property(type=int, default=0)
+    broad = GObject.Property(type=bool, default=False)
 
-    def __init__(self, time="", user="", domain="", count=0):
+    def __init__(self, time="", user="", domain="", count=0, broad=False):
         super().__init__()
         self.time = time or ""
         self.user = user or ""
         self.domain = domain or ""
         self.count = count or 0
+        self.broad = bool(broad)
