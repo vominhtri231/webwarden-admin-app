@@ -42,8 +42,9 @@ def log_json(user=None, since=None, limit=None, year=None):
     return rows[:limit] if limit is not None else rows
 
 
-def log_summary_json(user=None, since=None, year=None):
-    return logparse.summarize(logparse.collect_blocked(user=user, since=since, year=year))
+def log_summary_json(user=None, since=None, year=None, group=False):
+    return logparse.summarize(
+        logparse.collect_blocked(user=user, since=since, year=year), group=group)
 
 
 def dumps(obj):

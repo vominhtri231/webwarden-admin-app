@@ -14,7 +14,7 @@ import datetime
 import os
 import re
 
-from . import paths
+from . import domain_groups, paths
 
 # The blocked-answer message. ``config`` is dnsmasq's keyword for an answer that
 # came from an address= directive (our catch-all).
@@ -137,13 +137,21 @@ def clear_all():
     return count
 
 
-def summarize(rows):
-    """Dedup to [{user, domain, count, last_seen}], most-recent first."""
+def summarize(rows, group=False):
+    """Dedup to [{user, domain, count, last_seen}], most-recent first.
+
+    When ``group`` is set, each domain is collapsed to its registrable domain
+    (eTLD+1) so dynamic subdomains fold into one row, and each row gains a
+    ``broad`` flag for shared/multi-tenant CDNs.
+    """
     agg = {}
     for r in rows:
-        key = (r["user"], r["domain"])
-        a = agg.setdefault(key, {"user": r["user"], "domain": r["domain"],
+        dom = domain_groups.registrable(r["domain"]) if group else r["domain"]
+        key = (r["user"], dom)
+        a = agg.setdefault(key, {"user": r["user"], "domain": dom,
                                  "count": 0, "last_seen": None})
+        if group:
+            a["broad"] = domain_groups.is_broad(dom)
         a["count"] += 1
         if r["time"] and (a["last_seen"] is None or r["time"] > a["last_seen"]):
             a["last_seen"] = r["time"]

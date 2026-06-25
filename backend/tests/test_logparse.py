@@ -100,3 +100,23 @@ def test_summarize_counts_and_last_seen():
     assert by[("alice", "x.com")]["count"] == 2
     assert by[("alice", "x.com")]["last_seen"] == "2026-06-24T22:11:00"
     assert by[("alice", "y.com")]["count"] == 1
+
+
+def test_summarize_ungrouped_has_no_broad_key():
+    rows = [{"time": "2026-06-24T22:11:00", "user": "a", "domain": "x.googlevideo.com"}]
+    out = logparse.summarize(rows)
+    assert out[0]["domain"] == "x.googlevideo.com"   # unchanged
+    assert "broad" not in out[0]
+
+
+def test_summarize_group_collapses_subdomains_and_sums_counts():
+    rows = [
+        {"time": "2026-06-24T22:11:00", "user": "alice", "domain": "r3---sn-a.googlevideo.com"},
+        {"time": "2026-06-24T22:10:00", "user": "alice", "domain": "r5---sn-b.googlevideo.com"},
+        {"time": "2026-06-24T22:09:00", "user": "alice", "domain": "fonts.googleapis.com"},
+    ]
+    by = {(r["user"], r["domain"]): r for r in logparse.summarize(rows, group=True)}
+    assert by[("alice", "googlevideo.com")]["count"] == 2
+    assert by[("alice", "googlevideo.com")]["last_seen"] == "2026-06-24T22:11:00"
+    assert by[("alice", "googlevideo.com")]["broad"] is False
+    assert by[("alice", "googleapis.com")]["broad"] is True   # shared CDN flagged

@@ -94,6 +94,21 @@ def test_log_prune_uses_days_override(_env, monkeypatch):
     assert seen == [5]
 
 
+def test_log_summary_group_collapses_and_flags_broad(_env, monkeypatch, capsys):
+    from webwarden_cli import logparse
+    monkeypatch.setattr(logparse, "collect_blocked", lambda **kw: [
+        {"time": "2026-06-24T22:11:00", "user": "alice", "domain": "r1.googlevideo.com"},
+        {"time": "2026-06-24T22:10:00", "user": "alice", "domain": "r2.googlevideo.com"},
+        {"time": "2026-06-24T22:09:00", "user": "alice", "domain": "cdn.cloudfront.net"},
+    ])
+    assert cli.main(["log", "--summary", "--group", "--json"]) == 0
+    data = json.loads(capsys.readouterr().out.strip())
+    by = {r["domain"]: r for r in data}
+    assert by["googlevideo.com"]["count"] == 2
+    assert by["googlevideo.com"]["broad"] is False
+    assert by["cloudfront.net"]["broad"] is True
+
+
 def test_users_json_output(_env, monkeypatch, capsys):
     monkeypatch.setattr(users, "list_human_users", lambda: [("alice", 1000), ("bob", 1001)])
     state.set_locked("alice", True)

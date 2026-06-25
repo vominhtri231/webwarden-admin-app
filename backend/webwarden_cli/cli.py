@@ -173,7 +173,8 @@ def cmd_log(args):
         return 0
     year = datetime.date.today().year
     if args.summary:
-        data = jsonapi.log_summary_json(user=args.user, since=args.since, year=year)
+        data = jsonapi.log_summary_json(user=args.user, since=args.since, year=year,
+                                        group=args.group)
     else:
         data = jsonapi.log_json(user=args.user, since=args.since,
                                 limit=args.limit, year=year)
@@ -232,6 +233,8 @@ def build_parser():
     sp = sub.add_parser("log", help="blocked-attempt log (JSON); also --prune/--clear")
     sp.add_argument("--json", action="store_true")
     sp.add_argument("--summary", action="store_true")
+    sp.add_argument("--group", action="store_true",
+                    help="with --summary: collapse to registrable domains + flag broad CDNs")
     sp.add_argument("--user")
     sp.add_argument("--since")
     sp.add_argument("--limit", type=int)
