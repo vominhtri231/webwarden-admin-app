@@ -53,7 +53,9 @@ class AllowlistView(Gtk.Box):
 
     # users dropdown ---------------------------------------------------------
     def reload_users(self):
-        self.client.run_json(users_args(), self._populate_users, self._err, key="users")
+        # Distinct key: UsersView also loads users with key="users"; sharing it let the
+        # client's busy-guard drop whichever fired second (this view) -> empty dropdown (#2).
+        self.client.run_json(users_args(), self._populate_users, self._err, key="allowlist-users")
 
     def _populate_users(self, data):
         self._usernames = [u["username"] for u in data]
