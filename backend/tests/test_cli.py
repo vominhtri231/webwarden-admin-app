@@ -36,6 +36,26 @@ def test_allow_unknown_user(_env, monkeypatch):
     assert cli.main(["allow", "ghost", "example.com"]) != 0
 
 
+def test_allow_users_adds_to_all_with_single_apply(_env):
+    rc = cli.main(["allow-users", "Example.com", "alice", "bob"])
+    assert rc == 0
+    assert state.read_allowlist("alice") == ["example.com"]
+    assert state.read_allowlist("bob") == ["example.com"]
+    assert _env == ["allow-users"]          # one reconcile, not one per user
+
+
+def test_allow_users_rejects_invalid_domain(_env):
+    assert cli.main(["allow-users", "not a domain", "alice"]) != 0
+    assert _env == []
+
+
+def test_allow_users_unknown_user_no_partial(_env, monkeypatch):
+    monkeypatch.setattr(users, "user_exists", lambda u: u == "alice")
+    assert cli.main(["allow-users", "example.com", "alice", "ghost"]) != 0
+    assert state.read_allowlist("alice") == []   # validated before any mutation
+    assert _env == []
+
+
 def test_lock_unlock_frees_port(_env):
     assert cli.main(["lock", "alice"]) == 0
     assert state.is_locked("alice")

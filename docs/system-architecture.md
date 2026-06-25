@@ -40,4 +40,5 @@ argv arrays — never shell-interpolated. Mutations require admin auth via the s
 
 ## Stable CLI contract
 See `plans/260624-2214-webwarden-backend-gui-build/plan.md` (the GUI's API). Additive commands:
-`webwarden settings [--json | --set-retention-days N]` and `webwarden log [--prune [--days N] | --clear]`.
+`webwarden settings [--json | --set-retention-days N]`, `webwarden log [--prune [--days N] | --clear]`,
+and `webwarden allow-users <domain> <user>...` (one domain to many users, single reconcile).

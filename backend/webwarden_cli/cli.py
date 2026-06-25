@@ -50,6 +50,28 @@ def cmd_allow(args):
     return 0
 
 
+def cmd_allow_users(args):
+    """Allow one domain for several users in a single privileged call.
+
+    Validates the domain once and that every user exists, then mutates all of
+    them and reconciles ONCE (looping single-user `allow` would re-apply per
+    user). Validates fully before mutating so a bad user can't leave a partial.
+    """
+    valid, invalid = _normalize_domains([args.domain])
+    if invalid:
+        return _die("invalid domain: " + args.domain)
+    missing = [u for u in args.usernames if not users.user_exists(u)]
+    if missing:
+        return _die("no such user(s): " + ", ".join(missing))
+    if not _is_root():
+        return _die("must run as root")
+    for u in args.usernames:
+        state.add_domains(u, valid)
+    apply_module.apply("allow-users")
+    print("added {} for {} user(s)".format(valid[0], len(args.usernames)))
+    return 0
+
+
 def cmd_disallow(args):
     if not users.user_exists(args.username):
         return _die("no such user: " + args.username)
@@ -212,6 +234,11 @@ def build_parser():
     sp.add_argument("username")
     sp.add_argument("domains", nargs="+")
     sp.set_defaults(func=cmd_allow)
+
+    sp = sub.add_parser("allow-users", help="allow one domain for multiple users")
+    sp.add_argument("domain")
+    sp.add_argument("usernames", nargs="+")
+    sp.set_defaults(func=cmd_allow_users)
 
     sp = sub.add_parser("disallow", help="remove domain(s) for a user")
     sp.add_argument("username")

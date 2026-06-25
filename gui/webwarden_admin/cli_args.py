@@ -58,6 +58,11 @@ def allow_args(username, domains):
     return [WEBWARDEN, "allow", username, *domains]
 
 
+def allow_users_args(domain, usernames):
+    """Allow one domain for many users in a single CLI call."""
+    return [WEBWARDEN, "allow-users", domain, *usernames]
+
+
 def disallow_args(username, domains):
     return [WEBWARDEN, "disallow", username, *domains]
 

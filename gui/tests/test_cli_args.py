@@ -24,6 +24,8 @@ def test_mutation_args():
     assert a.disallow_args("alice", ["a.com"]) == ["webwarden", "disallow", "alice", "a.com"]
     assert a.lock_args("alice") == ["webwarden", "lock", "alice"]
     assert a.unlock_args("alice") == ["webwarden", "unlock", "alice"]
+    assert a.allow_users_args("example.com", ["alice", "bob"]) == \
+        ["webwarden", "allow-users", "example.com", "alice", "bob"]
 
 
 def test_settings_and_log_admin_args():

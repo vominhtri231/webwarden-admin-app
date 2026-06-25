@@ -4,7 +4,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk  # noqa: E402
 
-from ..cli_args import (allow_args, disallow_args, list_args, prepare_domain, users_args)
+from ..cli_args import (allow_users_args, disallow_args, list_args, prepare_domain, users_args)
 from ..widgets.confirm import confirm
 
 
@@ -15,6 +15,7 @@ class AllowlistView(Gtk.Box):
         self.client = window.client
         self._user = None
         self._usernames = []
+        self._checks = {}          # username -> Gtk.CheckButton in the "Apply to" popover
         for m in ("set_margin_top", "set_margin_bottom", "set_margin_start", "set_margin_end"):
             getattr(self, m)(12)
 
@@ -34,9 +35,18 @@ class AllowlistView(Gtk.Box):
         self.entry.set_placeholder_text("example.com or a pasted URL")
         self.entry.set_hexpand(True)
         self.entry.connect("activate", lambda e: self._add())
+        # "Apply to ...": add the domain to several users at once (one call).
+        self.targets_btn = Gtk.MenuButton(label="Apply to: —")
+        self._targets_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        for m in ("set_margin_top", "set_margin_bottom", "set_margin_start", "set_margin_end"):
+            getattr(self._targets_box, m)(8)
+        pop = Gtk.Popover()
+        pop.set_child(self._targets_box)
+        self.targets_btn.set_popover(pop)
         add_btn = Gtk.Button(label="Add")
         add_btn.connect("clicked", lambda b: self._add())
         add.append(self.entry)
+        add.append(self.targets_btn)
         add.append(add_btn)
         self.append(add)
 
@@ -53,7 +63,9 @@ class AllowlistView(Gtk.Box):
 
     # users dropdown ---------------------------------------------------------
     def reload_users(self):
-        self.client.run_json(users_args(), self._populate_users, self._err, key="users")
+        # Distinct key: UsersView also loads users with key="users"; sharing it let
+        # the client's busy-guard drop whichever fired second (this view) -> issue #2.
+        self.client.run_json(users_args(), self._populate_users, self._err, key="allowlist-users")
 
     def _populate_users(self, data):
         self._usernames = [u["username"] for u in data]
@@ -62,12 +74,46 @@ class AllowlistView(Gtk.Box):
             self.user_dd.set_selected(0)
             self._user = self._usernames[0]
             self._load_domains()
+        self._build_targets()
 
     def _on_user_changed(self, dd, _pspec):
         idx = dd.get_selected()
         if 0 <= idx < len(self._usernames):
             self._user = self._usernames[idx]
+            cb = self._checks.get(self._user)
+            if cb is not None:
+                cb.set_active(True)          # the browsed user is a default add target
             self._load_domains()
+
+    # "apply to" multi-select ------------------------------------------------
+    def _build_targets(self):
+        child = self._targets_box.get_first_child()
+        while child:
+            nxt = child.get_next_sibling()
+            self._targets_box.remove(child)
+            child = nxt
+        self._checks = {}
+        for name in self._usernames:
+            cb = Gtk.CheckButton(label=name)
+            cb.set_active(name == self._user)
+            cb.connect("toggled", lambda c: self._update_targets_label())
+            self._targets_box.append(cb)
+            self._checks[name] = cb
+        self._update_targets_label()
+
+    def _checked_users(self):
+        return [n for n in self._usernames
+                if self._checks.get(n) is not None and self._checks[n].get_active()]
+
+    def _update_targets_label(self):
+        checked = self._checked_users()
+        if not checked:
+            label = "Apply to: —"
+        elif len(checked) == 1:
+            label = "Apply to: " + checked[0]
+        else:
+            label = "Apply to: {} +{}".format(checked[0], len(checked) - 1)
+        self.targets_btn.set_label(label)
 
     # domains ----------------------------------------------------------------
     def _load_domains(self):
@@ -105,11 +151,14 @@ class AllowlistView(Gtk.Box):
         if not ok:
             self.window.notify("Invalid domain: " + (raw or "(empty)"), error=True)
             return
-        if not self._user:
+        targets = self._checked_users()
+        if not targets:
+            self.window.notify("Pick at least one user under 'Apply to'", error=True)
             return
-        self.client.run_mutation(allow_args(self._user, [domain]),
-                                 lambda out: self._after("Added " + domain),
-                                 self._err, key="allow")
+        self.client.run_mutation(
+            allow_users_args(domain, targets),
+            lambda out: self._after("Added {} for {} user(s)".format(domain, len(targets))),
+            self._err, key="allow")
         self.entry.set_text("")
 
     def _remove(self, domain):

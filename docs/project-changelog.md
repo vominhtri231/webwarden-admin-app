@@ -29,10 +29,16 @@ All notable changes to webwarden. Format loosely follows Keep a Changelog.
   `0` = keep forever), privileged `webwarden settings` and `webwarden log --prune` / `--clear`,
   a daily `webwarden-logprune.timer`, and a GUI **Settings** view + Log-view **Clear all logs**
   button. Retention is also enforced at the end of every `apply` (#5).
+- Multi-user allow: `webwarden allow-users <domain> <user>...` adds one domain to several users in
+  a single privileged call (validates all, one `apply`); the Allowlist view gains an "Apply to…"
+  multi-select popover (#2).
 
 ### Fixed
-- Allowlist user dropdown rendered blank — gave the `Gtk.DropDown` a `PropertyExpression` so
-  usernames display and a user can be selected (#2).
+- Allowlist dropdown was empty — root cause was a busy-key collision: `UsersView` and
+  `AllowlistView` both loaded users with `key="users"`, so the client's overlap-guard dropped the
+  second call and `AllowlistView` never populated. Fixed by loading on a distinct
+  `key="allowlist-users"`. (The earlier `PropertyExpression` change, kept, was necessary for the
+  hand-built `DropDown` to render but was not the bug.) (#2)
 - Silenced the startup `PyGIWarning` by pinning `Gdk` to `4.0` before import (#3).
 - Replaced the stock launcher icon with a branded `webwarden-admin` shield SVG installed into
   the hicolor theme (#4).
