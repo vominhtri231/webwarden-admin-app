@@ -44,6 +44,9 @@ echo "Installing app icon..."
 # librsvg, so no per-size PNGs are needed.
 install -d /usr/share/icons/hicolor/scalable/apps
 install -m 0644 "$SRC/assets/icons/webwarden-admin.svg" /usr/share/icons/hicolor/scalable/apps/webwarden-admin.svg
+# Also install under the GApplication id: GTK looks up the WINDOW icon by app-id,
+# so this is what makes the taskbar/window-list icon (not just the menu) correct.
+install -m 0644 "$SRC/assets/icons/webwarden-admin.svg" /usr/share/icons/hicolor/scalable/apps/org.webwarden.admin.svg
 command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true
 
 echo "Installing systemd units..."

@@ -28,6 +28,7 @@ rm -rf /usr/share/webwarden
 rm -rf /usr/share/webwarden-admin
 rm -f /usr/share/applications/webwarden-admin.desktop
 rm -f /usr/share/icons/hicolor/scalable/apps/webwarden-admin.svg
+rm -f /usr/share/icons/hicolor/scalable/apps/org.webwarden.admin.svg
 command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true
 rm -f /etc/systemd/system/webwarden-dns@.service
 rm -f /etc/systemd/system/webwarden-nft.service
