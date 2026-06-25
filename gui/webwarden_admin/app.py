@@ -5,7 +5,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
-from gi.repository import Gdk, Gio, Gtk  # noqa: E402
+from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
 from .cli_client import CliClient, backend_available
 from .window import MainWindow
@@ -38,4 +38,11 @@ class WebwardenApp(Gtk.Application):
 
 
 def main():
+    # The launcher runs us as "python3 -m webwarden_admin", so g_get_prgname()
+    # defaults to "python3" and GTK sets the X11 WM_CLASS to it -> the taskbar
+    # matches python3.desktop and shows the Python icon (issue #4). Pin the
+    # program name to the app id so the window-list maps the window back to our
+    # launcher (which carries StartupWMClass=org.webwarden.admin + our icon).
+    GLib.set_prgname(APP_ID)
+    GLib.set_application_name("webwarden Admin")
     return WebwardenApp().run(None)

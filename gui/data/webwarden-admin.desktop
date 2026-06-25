@@ -5,5 +5,8 @@ Comment=Manage per-user website allowlists and view blocked attempts
 Exec=webwarden-admin
 Icon=webwarden-admin
 Terminal=false
+# Map the running window (GTK sets its WM_CLASS to the GApplication id) back to
+# this launcher so the taskbar/window-list shows our icon, not a generic one.
+StartupWMClass=org.webwarden.admin
 Categories=System;Settings;Security;
 Keywords=parental;allowlist;filter;firewall;dns;
